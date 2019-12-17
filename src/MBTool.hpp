@@ -33,15 +33,17 @@ public:
 
   void summarise();
   
-private:
-  moab::ErrorCode check_vertex_exists(std::array<double,3> coord, moab::EntityHandle &tVertex);
   moab::ErrorCode make_new_surface(moab::EntityHandle &surface);
-  moab::ErrorCode make_new_curve(moab::EntityHandle &curve);
-  moab::ErrorCode add_facets_to_surface(moab::EntityHandle,
-					facet_data facetData);
   moab::ErrorCode add_facets_and_curves_to_surface(moab::EntityHandle,
 						    facet_data facetData,
 						    std::vector<edge_data> edge_data);
+  moab::ErrorCode add_surface_to_volume(moab::EntityHandle surface,
+          moab::EntityHandle volume, int sense);
+private:
+  moab::ErrorCode check_vertex_exists(std::array<double,3> coord, moab::EntityHandle &tVertex);
+  moab::ErrorCode make_new_curve(moab::EntityHandle &curve);
+  moab::ErrorCode add_facets_to_surface(moab::EntityHandle,
+					facet_data facetData);
   private:
   moab::Core *mbi;
   VertexInserter::VertexInserter *vi;

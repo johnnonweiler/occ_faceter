@@ -90,6 +90,14 @@ moab::ErrorCode MBTool::add_surface(moab::EntityHandle volume,
   return rval;
 }
 
+moab::ErrorCode MBTool::add_surface_to_volume(moab::EntityHandle surface,
+          moab::EntityHandle volume, int sense) {
+  moab::ErrorCode rval;
+  rval = mbi->add_parent_child(volume, surface);
+  // TODO: myGeomTopoTool->set_sense(surface, volume, sense);
+  return rval;
+}
+
 //  makes a new surface in moab
 moab::ErrorCode MBTool::make_new_surface(moab::EntityHandle &surface) {
   surfID++;
