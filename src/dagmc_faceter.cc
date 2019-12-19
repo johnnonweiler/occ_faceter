@@ -40,8 +40,6 @@
 
 typedef NCollection_IndexedDataMap<TopoDS_Shape, moab::EntityHandle, TopTools_ShapeMapHasher> MapFaceToSurface;
 
-MapFaceToSurface surfaceMap;
-
 MBTool *mbtool = new MBTool();
 
 float facet_tol = 0.;
@@ -214,37 +212,35 @@ void facet_all_volumes_v1(Handle_TopTools_HSequenceOfShape shape_list) {
 void facet_all_volumes(Handle_TopTools_HSequenceOfShape shape_list) {
   int count = shape_list->Length();
 
-  // make a list of all the faces (for simpler loops below)
-  std::vector<TopoDS_Face> allFaces;
+  std::vector<TopoDS_Face> uniqueFaces;
+  MapFaceToSurface surfaceMap;
+
+  // list unique faces, create empty surfaces, and build surfaceMap
   for (int i = 1; i <= count; i++) {
     TopoDS_Shape shape = shape_list->Value(i);
     for (TopExp_Explorer ex(shape, TopAbs_FACE); ex.More(); ex.Next()) {
-      TopoDS_Face currentFace = TopoDS::Face(ex.Current());
-      allFaces.push_back(currentFace);
+      TopoDS_Face face = TopoDS::Face(ex.Current());
+      // Important note: For the surface map, face equivalence is defined
+      // by TopoDS_Shape::IsSame(), which ignores the orientation.
+      if (surfaceMap.Contains(face))
+        continue;
+
+      uniqueFaces.push_back(face);
+      moab::EntityHandle surface;
+      mbtool->make_new_surface(surface);
+      surfaceMap.Add(face, surface);
     }
-  }
-
-  // create empty surfaces, and add to surfaceMap
-  for (TopoDS_Face face : allFaces) {
-    // Important note: For the surface map, face equivalence is defined
-    // by TopoDS_Shape::IsSame(), which ignores the orientation.
-    if (surfaceMap.Contains(face))
-      continue;
-
-    moab::EntityHandle surface;
-    mbtool->make_new_surface(surface);
-    surfaceMap.Add(face, surface);
   }
 
   // do the hard work
   // (a range based for loop doesn't seem to work with OpenMP)
 #pragma omp parallel for
-  for (int i = 0; i < allFaces.size(); i++) {
-    perform_faceting(allFaces[i]);
+  for (int i = 0; i < uniqueFaces.size(); i++) {
+    perform_faceting(uniqueFaces[i]);
   }
 
   // add facets (and edges) to surfaces
-  for (TopoDS_Face face : allFaces) {
+  for (TopoDS_Face face : uniqueFaces) {
     moab::EntityHandle surface = surfaceMap.FindFromKey(face);
     surface_data data = get_facets_for_face(face);
     mbtool->add_facets_and_curves_to_surface(surface, data.facets, data.edge_collection);
