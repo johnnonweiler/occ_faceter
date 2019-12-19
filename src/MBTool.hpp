@@ -7,6 +7,10 @@
 #include "rtree/RTree.h"
 #include "vertex_inserter.hh"
 
+namespace moab {
+class GeomTopoTool;
+}
+
 // convenient return for facets
 struct facet_data {
   std::vector<std::array<double,3> > coords;
@@ -47,6 +51,7 @@ private:
   private:
   moab::Core *mbi;
   VertexInserter::VertexInserter *vi;
+  moab::GeomTopoTool *geom_tool;
   int volID;
   int surfID;
   int curveID;
