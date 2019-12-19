@@ -38,7 +38,7 @@
 #include "BRep_Builder.hxx"
 #include "NCollection_IndexedDataMap.hxx"
 
-typedef NCollection_IndexedDataMap<TopoDS_Shape, moab::EntityHandle, TopTools_ShapeMapHasher> MapFaceToSurface;
+typedef NCollection_IndexedDataMap<TopoDS_Face, moab::EntityHandle, TopTools_ShapeMapHasher> MapFaceToSurface;
 
 MBTool *mbtool = new MBTool();
 
@@ -240,8 +240,9 @@ void facet_all_volumes(Handle_TopTools_HSequenceOfShape shape_list) {
   }
 
   // add facets (and edges) to surfaces
-  for (TopoDS_Face face : uniqueFaces) {
-    moab::EntityHandle surface = surfaceMap.FindFromKey(face);
+  for (MapFaceToSurface::Iterator it(surfaceMap); it.More(); it.Next()) {
+    TopoDS_Face face = it.Key();
+    moab::EntityHandle surface = it.Value();
     surface_data data = get_facets_for_face(face);
     mbtool->add_facets_and_curves_to_surface(surface, data.facets, data.edge_collection);
   }
