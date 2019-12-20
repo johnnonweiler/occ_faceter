@@ -150,63 +150,10 @@ surface_data get_facets_for_face(TopoDS_Face currentFace) {
   return surface;
 }
 
-// for a given shape - get the faces and edges
-// then facet the face and also extract edges
-std::vector<surface_data> get_facets_for_shape(TopoDS_Shape shape) {
-  std::vector<surface_data> surfaces;
-
-  for (TopExp_Explorer ex(shape, TopAbs_FACE); ex.More(); ex.Next()) {
-    TopoDS_Face currentFace = TopoDS::Face(ex.Current());
-    surface_data surface = get_facets_for_face(currentFace);
-    surfaces.push_back(surface);
-  }
-
-  return surfaces;
-}
-
-const char *file_name(int i) {
-  static char buffer[50];
-  sprintf(buffer, "temp%d.brep", i);
-  return buffer;
-}
-
 // Use BRepMesh_IncrementalMesh to make the triangulation
 void perform_faceting(TopoDS_Face face) {
   // This constructor calls Perform()
   BRepMesh_IncrementalMesh facets(face, facet_tol, false, 0.5);
-}
-
-// facet all the volumes
-void facet_all_volumes_v1(Handle_TopTools_HSequenceOfShape shape_list) {
-  int count = shape_list->Length();
-
-  std::vector<moab::EntityHandle> vols(count);
-  for (int i = 0; i < count; i++) {
-    mbtool->make_new_volume(vols.at(i));
-  }
-
-#pragma omp parallel for num_threads(4)
-  for (int i = 1; i <= count; i++) {
-    TopoDS_Shape shape = shape_list->Value(i);
-    for (TopExp_Explorer ex(shape, TopAbs_FACE); ex.More(); ex.Next()) {
-      TopoDS_Face face = TopoDS::Face(ex.Current());
-      perform_faceting(face);
-    }
-
-//    BRepTools::Write(shape, file_name(i));
-  }
-
-  for (int i = 1; i <= count; i++) {
-    TopoDS_Shape shape = shape_list->Value(i);
-//     TopoDS_Shape shape;
-//     BRep_Builder builder;
-//     BRepTools::Read(shape, file_name(i), builder);
-    std::vector<surface_data> surfaces = get_facets_for_shape(shape);
-
-    for (const surface_data &surface : surfaces)
-      mbtool->add_surface(vols.at(i - 1), surface.facets, surface.edge_collection);
-  }
-  return;
 }
 
 void facet_all_volumes(Handle_TopTools_HSequenceOfShape shape_list) {
