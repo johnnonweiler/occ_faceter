@@ -210,25 +210,6 @@ void facet_all_volumes(const TopTools_HSequenceOfShape& shape_list) {
   }
 }
 
-STEPControl_Reader *step;
-
-//dump all labels
-void dump_labels() {
-  const Handle(XSControl_WorkSession) &theSession = step->WS();
-  const Handle(Interface_InterfaceModel) &theModel = theSession->Model();
-
-  Standard_Integer nb = theModel->NbEntities();
-  for (Standard_Integer i = 1; i <= nb; i++) {
-
-    Handle(StepRepr_Representation) ent =
-        Handle(StepRepr_Representation)::DownCast(theModel->Value(i));
-    if (ent.IsNull()) continue;
-    if (ent->Name().IsNull()) continue;
-    std::cout << ent->Name()->ToCString() << std::endl;
-  }
-  return;
-}
-
 void sew_shapes(const TopoDS_Shape& shape, TopTools_HSequenceOfShape& sewed_shapes) {
   if (shape.ShapeType() == TopAbs_COMPOUND) {
     // decend and get children
@@ -266,8 +247,6 @@ int main(int argc, char *argv[]) {
   sew_shapes(shape, shape_list);
 
   std::cout << "Instanciated " << shape_list.Length() << " items from file" << std::endl;
-
-  //dump_labels();
 
   facet_all_volumes(shape_list);
   mbtool->write_geometry(filename.c_str());
