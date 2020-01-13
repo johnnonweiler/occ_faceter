@@ -70,12 +70,7 @@ facet_data make_surface_facets(const TopoDS_Face &currentFace, const Triangulati
     for (int i = tris.Lower(); i <= tris.Upper(); i++) {
       // get the node indexes for this triangle
       const Poly_Triangle &tri = tris(i);
-
-      // reverse the triangle orientation if the face is reversed
-      if (currentFace.Orientation() != TopAbs_FORWARD)
-        tri.Get(conn[2], conn[1], conn[0]);
-      else
-        tri.Get(conn[0], conn[1], conn[2]);
+      tri.Get(conn[0], conn[1], conn[2]);
 
       facets_for_moab.connectivity.push_back(conn);
     }
