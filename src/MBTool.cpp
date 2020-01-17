@@ -53,6 +53,7 @@ MBTool::MBTool() {
 MBTool::~MBTool() {
     delete mbi;
     delete geom_tool;
+    delete vi;
 }
 
 moab::ErrorCode MBTool::set_tags() {
