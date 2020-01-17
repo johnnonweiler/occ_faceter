@@ -23,5 +23,11 @@ TEST_CASE("Faceting BREP and writing to MOAB", "[faceter]") {
 
   sew_and_facet(shape, facet_tol, mbtool);
 
+  std::vector<moab::EntityHandle> triangles;
+  moab::ErrorCode ret = mbtool.get_entities_by_dimension(0, 2, triangles, true);
+
+  REQUIRE(ret == moab::MB_SUCCESS);
+  REQUIRE(triangles.size() == 22);
+
   mbtool.write_geometry(output_path);
 }
