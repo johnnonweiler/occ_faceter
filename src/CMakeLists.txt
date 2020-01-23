@@ -25,6 +25,10 @@ IF(OCE_FOUND OR OCC_FOUND )
   ADD_EXECUTABLE(step2breps step2breps.cc)
   TARGET_LINK_LIBRARIES(step2breps ${OCE_LINK_LIBS})
   INSTALL(TARGETS step2breps DESTINATION bin)
+
+  ADD_EXECUTABLE(steps2h5m steps2h5m.cc)
+  TARGET_LINK_LIBRARIES(steps2h5m dagmc_faceter ${OCE_LINK_LIBS})
+  INSTALL(TARGETS steps2h5m DESTINATION bin)
 ENDIF(OCE_FOUND OR OCC_FOUND )
 
 ADD_LIBRARY(dagmc_topology dagmc_topology.cc)
