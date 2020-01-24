@@ -45,9 +45,9 @@ int main(int argc, char *argv[]) {
   MBTool mbtool;
   mbtool.set_tags();
 
-  for (const auto &pair : j) {
-    std::string step_file = pair[0];
-    std::string material = pair[1];
+  for (const auto &p : j) {
+    std::string step_file = p["filename"].get<std::string>();
+    std::string material = p["material"].get<std::string>();
 
     TopoDS_Shape shape = step_to_one_brep(step_file);
     MaterialsMap emptyMap;
