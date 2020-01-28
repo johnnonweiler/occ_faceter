@@ -6,29 +6,9 @@
 #include "read_metadata.hh"
 #include "MBTool.hpp"
 #include "UniqueId/json.hpp"
+#include "step2breps.hh"
 
 using json = nlohmann::json;
-
-TopoDS_Shape step_to_one_brep(std::string step_file) {
-  STEPControl_Reader step;
-  step.ReadFile(step_file.c_str());
-  step.PrintCheckLoad(false, IFSelect_ListByItem);
-  step.ClearShapes();
-  int count = step.NbRootsForTransfer();
-  if (count > 1) {
-    std::cerr << "Error: More than one root in STEP file." << std::endl;
-  } else if (count < 1) {
-    std::cerr << "Error: Less than one root in STEP file." << std::endl;
-    return TopoDS_Shape();
-  }
-
-  bool ok = step.TransferRoot(1);
-  step.PrintCheckTransfer(false, IFSelect_CountByItem);
-  if (!ok) {
-    return TopoDS_Shape();
-  }
-  return step.Shape(1);
-}
 
 int main(int argc, char *argv[]) {
   if (argc < 4) {
@@ -49,9 +29,12 @@ int main(int argc, char *argv[]) {
     std::string step_file = p["filename"].get<std::string>();
     std::string material = p["material"].get<std::string>();
 
-    TopoDS_Shape shape = step_to_one_brep(step_file);
+    std::cout << step_file << " : " << material << std::endl;
+    std::vector<TopoDS_Shape> breps = step_to_breps(step_file);
     MaterialsMap emptyMap;
-    sew_and_facet(shape, facet_tol, mbtool, emptyMap, material);
+    for (TopoDS_Shape shape : breps) {
+      sew_and_facet(shape, facet_tol, mbtool, emptyMap, material);
+    }
   }
 
   mbtool.write_geometry(h5m_file.c_str());
