@@ -29,6 +29,11 @@ int main(int argc, char *argv[]) {
     std::string step_file = p["filename"].get<std::string>();
     std::string material = p["material"].get<std::string>();
 
+    // add "mat:"" prefix to non-empty materials, unless it's already there
+    if (!material.empty() && material.rfind("mat:", 0) != 0) {
+      material = "mat:" + material;
+    }
+
     std::cout << step_file << " : " << material << std::endl;
     std::vector<TopoDS_Shape> breps = step_to_breps(step_file);
     MaterialsMap emptyMap;
